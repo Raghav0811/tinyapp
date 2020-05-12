@@ -1,8 +1,23 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
+
+
+const generateRandomString = () => {
+  return Math.random().toString(36).substring(6);
+};
+
+
+
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -18,10 +33,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+app.post("urls", (req, res) => {
+  console.log(req.body);
+  res.send("OK");
 });
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -32,6 +51,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL };
+  console.log(req.params.shortURL)
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
