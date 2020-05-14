@@ -2,12 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const { urlDatabase, users } = require('./database/userDB.js');
+
+
 
 
 const generateRandomString = () => {
   return Math.random().toString(36).substring(6);
 };
 
+const getUserByEmail = (email, database) => {
+  return Object.values(database).find(user => user.email === email);
+};
 
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -19,10 +25,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -84,3 +86,78 @@ app.post("/urls/:shortURL/delete", (req,res) => {
     res.render("urls_error", templateVars);
   }
 });
+
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user :users[req.session.user_id]
+  };
+  if (templateVars.user) {
+    res.redirect ('/urls');
+  } else {
+    res.render("urls_login", templateVars);
+  }
+});
+
+app.post("/login", (req,res) => {
+  const { email, password } = req.body;
+  const user = getUserByEmail(email, users);
+  if (!user) {
+    let templateVars = {
+      status: 401,
+      message: 'Email not found',
+      user: users[req.session.user_id]
+    }
+    res.status(401);
+    res.render("urls_error", templateVars);
+  } else if (!bcrypt.compareSync(password, user.password)) {
+    let templateVars = {
+      status: 401,
+      message: 'Password incorrect',
+      user: users[req.session.user_id]
+    }
+    res.status(401);
+    res.render("urls_error", templateVars);
+  } else {
+    req.session.user_id = user.id;
+    res.cookie('userEmail', email);
+    res.redirect("/urls");
+  }
+});
+
+//REGISTER
+
+app.get("/register", (req, res) => {
+  let userId = req.session.user_id;
+  if(userId){
+    res.redirect('/urls');
+  } else {
+    res.render("register");
+  }
+});
+
+
+ app.post("/register", (req, res) => {
+   const { email, password } = req.body;
+   if (!email || !password) {
+    let templateVars = {
+      status: 401,
+      message: 'Your Email and/or password is incorrect.',
+      user: users[req.session.user_id]
+    }
+    res.status(401);
+    res.render("urls_error", templateVars);
+    ('Email and/or password missing');
+  } else if (getUserByEmail(email, users)) {
+    let templateVars = {
+      status: 409,
+      message: 'An account with this password already exists ',
+      user: users[req.session.user_id]
+    }
+    res.status(409);
+    res.render("urls_error", templateVars);
+  } else {
+    const user_id = addUser(email, password, users);
+    req.session.user_id = user_id;
+    res.redirect("/urls");
+  }
+ });
