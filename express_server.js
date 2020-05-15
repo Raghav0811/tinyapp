@@ -13,6 +13,7 @@ app.listen(PORT, () => {
 
 
 app.use(bodyParser.urlencoded({extended: true}));
+
 app.use(
   cookieSession({
     name: 'session',
@@ -22,7 +23,7 @@ app.use(
 
 app.set("view engine", "ejs");
 
-// ROUTES
+
 
 // / => homepage
 app.get("/", (req, res) => {
@@ -33,7 +34,7 @@ app.get("/", (req, res) => {
   }
 });
 
-// /URLS => list of all of the user's URLs
+// /URLS 
 app.get("/urls", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id],
@@ -46,7 +47,7 @@ app.post("/urls", (req, res) => {
   if (!req.session.user_id) {
     let templateVars = {
       status: 401,
-      message: 'You need to be logged in to perform that action',
+      message: 'Please log in to perform action',
       user: users[req.session.user_id]
     }
     res.status(401);
@@ -74,7 +75,7 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     let templateVars = {
       status: 404,
-      message: 'This TinyURL does not exist',
+      message: 'This ShortURL does not exist',
       user: users[req.session.user_id]
     }
     res.status(404);
@@ -90,7 +91,7 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     let templateVars = {
       status: 401,
-      message: 'This TinyURL does not belong to you',
+      message: 'This ShortURL does not belong to you',
       user: users[req.session.user_id]
     }
     res.status(401);
@@ -113,7 +114,7 @@ app.post("/urls/:shortURL", (req, res) => {
   } else {
     let templateVars = {
       status: 401,
-      message: 'You are not allowed to edit that TinyURL',
+      message: 'You are not allowed to edit that ShortURL',
       user: users[req.session.user_id]
     }
     res.status(401);
@@ -130,7 +131,7 @@ app.post("/urls/:shortURL/delete", (req,res) => {
   } else {
     let templateVars = {
       status: 401,
-      message: 'Not allowed to delete TinyURL',
+      message: 'Not allowed to delete ShortURL',
       user: users[req.session.user_id]
     }
     res.status(401);
@@ -146,7 +147,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[shortURL]) {
     let templateVars = {
       status: 404,
-      message: 'TinyURL does not exist',
+      message: 'ShortURL does not exist',
       user: users[req.session.user_id]
     }
     res.status(404);
