@@ -1,11 +1,14 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, urlsForUser, addUser, addURL } = require('./helperfuncs');
 const { urlDatabase, users } = require('./database/userDB.js');
+const morgan = require("morgan");
+
+app.use(morgan ('dev'));
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -103,6 +106,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   const newDate = new Date();
+  console.log('urlpost');
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = longURL;
     urlDatabase[shortURL].visitCount = 0;
@@ -110,6 +114,7 @@ app.post("/urls/:shortURL", (req, res) => {
     urlDatabase[shortURL].uVisitCount = 0;
     urlDatabase[shortURL].visitorIDList = [];
     urlDatabase[shortURL].dateCreation = newDate;
+    console.log(urlDatabase);
     res.redirect(`/urls/${shortURL}`);
   } else {
     let templateVars = {
