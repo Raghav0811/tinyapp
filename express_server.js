@@ -39,6 +39,15 @@ app.get("/", (req, res) => {
 
 // /URLS 
 app.get("/urls", (req, res) => {
+  if (!req.session.user_id) {
+    let errorTemplateVars = {
+      status: 401,
+      message: 'Please log in to perform action',
+      user: users[req.session.user_id]
+    }
+    res.status(401);    
+    res.render("urls_error", errorTemplateVars);
+  }
   let templateVars = {
     user: users[req.session.user_id],
     urls: urlsForUser(req.session.user_id, urlDatabase)
