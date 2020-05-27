@@ -47,6 +47,7 @@ app.get("/urls", (req, res) => {
     }
     res.status(401);    
     res.render("urls_error", errorTemplateVars);
+    return;
   }
   let templateVars = {
     user: users[req.session.user_id],
@@ -115,7 +116,6 @@ app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = req.body.longURL;
   const newDate = new Date();
-  console.log('urlpost');
   if (req.session.user_id === urlDatabase[shortURL].userID) {
     urlDatabase[shortURL].longURL = longURL;
     urlDatabase[shortURL].visitCount = 0;
